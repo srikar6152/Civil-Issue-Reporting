@@ -1,4 +1,3 @@
-
 package com.civrt.app.config;
 
 import com.cloudinary.Cloudinary;
@@ -12,17 +11,18 @@ import java.util.Map;
 @Configuration
 public class CloudinaryConfig {
 
-    @Value("${cloudinary.cloud_name:}")
+    @Value("${cloudinary.cloud_name}") // <-- CHANGED: Removed ':${}' to make property required
     private String cloud;
 
-    @Value("${cloudinary.api_key:}")
+    @Value("${cloudinary.api_key}") // <-- CHANGED: Removed ':${}'
     private String key;
 
-    @Value("${cloudinary.api_secret:}")
+    @Value("${cloudinary.api_secret}") // <-- CHANGED: Removed ':${}'
     private String secret;
 
     @Bean
     public Cloudinary cloudinary() {
+        // This code will now only run if all three @Value properties were found.
         Map<String, String> cfg = ObjectUtils.asMap(
             "cloud_name", cloud,
             "api_key", key,
