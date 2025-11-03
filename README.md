@@ -1,5 +1,5 @@
 
-# CIVRT Backend (Spring Boot + MongoDB + STOMP)
+# CIVIL ISSUE REPORTING Backend (Spring Boot + MongoDB + STOMP)
 
 ## Run (dev)
 ```bash
