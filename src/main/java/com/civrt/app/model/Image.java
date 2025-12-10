@@ -1,9 +1,10 @@
 package com.civrt.app.model;
 
 public class Image {
-    private Long id;
+    private String id;
     private String url;
-    private String publicId; // cloudinary/etc id
+    private String publicId;
+    private String caption;
 
     public Image() {}
 
@@ -12,12 +13,15 @@ public class Image {
         this.publicId = publicId;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
     public String getUrl() { return url; }
     public void setUrl(String url) { this.url = url; }
 
     public String getPublicId() { return publicId; }
     public void setPublicId(String publicId) { this.publicId = publicId; }
+
+    public String getCaption() { return caption; }
+    public void setCaption(String caption) { this.caption = caption; }
 }
