@@ -1,65 +1,42 @@
-
 package com.civrt.app.model;
 
-import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
-@Data @Builder @NoArgsConstructor @AllArgsConstructor
-@Document(collection = "issue")
 public class Issue {
-    @Id
-    private String id;
-
+    private Long id;
     private String title;
-    private String category; // Road, Water, Waste, Streetlight, Drainage, Other
+    private String category;
     private String description;
+    private String locationText;
+    private Double lat;
+    private Double lng;
+    private List<Image> images = new ArrayList<>();
 
-    @Builder.Default
-    private Media media = new Media();
+    public Issue() {}
 
-    @Builder.Default
-    private Location location = new Location();
+    // Getters & setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    @Builder.Default
-    private String status = "New"; // New, In-Review, In-Progress, Resolved, Rejected
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    @Builder.Default
-    private String priority = "Medium"; // Low, Medium, High
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
-    private String createdBy;
-    private String assignedTo;
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    @Builder.Default
-    private List<History> history = new ArrayList<>();
+    public String getLocationText() { return locationText; }
+    public void setLocationText(String locationText) { this.locationText = locationText; }
 
-    private Instant createdAt;
-    private Instant updatedAt;
+    public Double getLat() { return lat; }
+    public void setLat(Double lat) { this.lat = lat; }
 
-    @Data @NoArgsConstructor @AllArgsConstructor
-    public static class Media {
-        private List<String> images = new ArrayList<>();
-        private List<String> videos = new ArrayList<>();
-    }
+    public Double getLng() { return lng; }
+    public void setLng(Double lng) { this.lng = lng; }
 
-    @Data @NoArgsConstructor @AllArgsConstructor
-    public static class Location {
-        private Double lat;
-        private Double lng;
-        private String address;
-        private String ward;
-    }
-
-    @Data @NoArgsConstructor @AllArgsConstructor @Builder
-    public static class History {
-        private Instant at;
-        private String by;
-        private String action;   // created | status | assign | note
-        private String note;
-        private String toStatus;
-    }
+    public List<Image> getImages() { return images; }
+    public void setImages(List<Image> images) { this.images = images; }
 }
