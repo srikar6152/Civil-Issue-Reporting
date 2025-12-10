@@ -1,4 +1,3 @@
-
 package com.civrt.app.config;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -13,18 +12,28 @@ import java.util.Arrays;
 @Configuration
 public class CorsConfig {
 
-    @Value("${app.cors.allowedOrigins:*}")
+    // Allow multiple origins separated by commas
+    @Value("${app.cors.allowedOrigins}")
     private String allowedOrigins;
 
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration c = new CorsConfiguration();
+
+        // Allow credentials + cookies
         c.setAllowCredentials(true);
+
+        // Allow frontend origins (localhost + deployed frontend)
         c.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+
+        // Allow all headers + methods
         c.addAllowedHeader("*");
         c.addAllowedMethod("*");
+
+        // Apply to API
         UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
         src.registerCorsConfiguration("/**", c);
+
         return new CorsFilter(src);
     }
 }
