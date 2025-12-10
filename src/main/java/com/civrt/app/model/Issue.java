@@ -4,61 +4,70 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
- * Plain Java model for Issue compatible with usages in your service/controller.
- * This is not a JPA entity. If you want JPA later, convert and add annotations.
+ * In-memory-friendly Issue model with nested classes to match usages in IssueService.
+ * Not a JPA entity. Convert to @Entity if you want DB persistence later.
  */
 public class Issue {
-    private Long id;
+    private String id;
     private String title;
     private String category;
     private String description;
-    private Location location;
+
+    // convenience legacy lat/lng fields (Service uses these in some places)
     private Double lat;
     private Double lng;
-    private List<Media> media = new ArrayList<>();
-    private List<Image> images = new ArrayList<>(); // keep compatibility if images used elsewhere
 
-    private List<History> history = new ArrayList<>();
+    // composite objects
+    private Location location;
+    private Media media;
 
-    private Instant createdAt;
-    private String createdBy;
-    private Instant updatedAt;
+    private String priority;
     private String status;
+    private String createdBy;
+    private Instant createdAt;
+    private Instant updatedAt;
     private String assignedTo;
 
+    // history list
+    private List<History> history = new ArrayList<>();
+
+    // optional images list (some controllers may use)
+    private List<Image> images = new ArrayList<>();
+
     public Issue() {
+        this.id = UUID.randomUUID().toString();
         this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
         this.status = "New";
     }
 
-    /* ========== simple builder ========== */
-    public static Builder builder() {
-        return new Builder();
-    }
+    /* ===================== Builder ===================== */
+    public static Builder builder() { return new Builder(); }
 
     public static class Builder {
-        private final Issue instance = new Issue();
+        private final Issue i = new Issue();
 
-        public Builder id(Long id) { instance.setId(id); return this; }
-        public Builder title(String title) { instance.setTitle(title); return this; }
-        public Builder category(String category) { instance.setCategory(category); return this; }
-        public Builder description(String description) { instance.setDescription(description); return this; }
-        public Builder location(Location location) { instance.setLocation(location); return this; }
-        public Builder media(Media media) {
-            if (media != null) instance.getMedia().add(media);
-            return this;
-        }
-        public Builder createdBy(String by) { instance.setCreatedBy(by); return this; }
-        public Builder status(String status) { instance.setStatus(status); return this; }
-        public Builder createdAt(Instant at) { instance.setCreatedAt(at); return this; }
+        public Builder id(String id) { i.setId(id); return this; }
+        public Builder title(String t) { i.setTitle(t); return this; }
+        public Builder category(String c) { i.setCategory(c); return this; }
+        public Builder description(String d) { i.setDescription(d); return this; }
+        public Builder lat(Double lat) { i.setLat(lat); return this; }
+        public Builder lng(Double lng) { i.setLng(lng); return this; }
+        public Builder location(Location l) { i.setLocation(l); return this; }
+        public Builder media(Media m) { i.setMedia(m); return this; }
+        public Builder priority(String p) { i.setPriority(p); return this; }
+        public Builder status(String s) { i.setStatus(s); return this; }
+        public Builder createdBy(String by) { i.setCreatedBy(by); return this; }
+        public Builder createdAt(Instant at) { i.setCreatedAt(at); return this; }
+        public Builder updatedAt(Instant at) { i.setUpdatedAt(at); return this; }
 
-        public Issue build() { return instance; }
+        public Issue build() { return i; }
     }
 
-    /* ========== nested helper classes ========== */
-
+    /* ===================== Nested classes ===================== */
     public static class Location {
         private Double lat;
         private Double lng;
@@ -76,38 +85,33 @@ public class Issue {
 
         public Double getLat() { return lat; }
         public void setLat(Double lat) { this.lat = lat; }
-
         public Double getLng() { return lng; }
         public void setLng(Double lng) { this.lng = lng; }
-
         public String getAddress() { return address; }
         public void setAddress(String address) { this.address = address; }
-
         public String getWard() { return ward; }
         public void setWard(String ward) { this.ward = ward; }
     }
 
     public static class Media {
-        private String url;
-        private String publicId;
-        private String caption;
+        private List<String> images = new ArrayList<>();
+        private List<String> videos = new ArrayList<>();
 
         public Media() {}
-        public Media(String url, String publicId) { this.url = url; this.publicId = publicId; }
 
-        public String getUrl() { return url; }
-        public void setUrl(String url) { this.url = url; }
+        public Media(List<String> images, List<String> videos) {
+            this.images = images != null ? images : new ArrayList<>();
+            this.videos = videos != null ? videos : new ArrayList<>();
+        }
 
-        public String getPublicId() { return publicId; }
-        public void setPublicId(String publicId) { this.publicId = publicId; }
-
-        public String getCaption() { return caption; }
-        public void setCaption(String caption) { this.caption = caption; }
+        public List<String> getImages() { return images; }
+        public void setImages(List<String> images) { this.images = images; }
+        public List<String> getVideos() { return videos; }
+        public void setVideos(List<String> videos) { this.videos = videos; }
     }
 
     /**
-     * A simple History record class with builder() to match usages like:
-     * Issue.History.builder().at(...).by(...).action(...).note(...).toStatus(...).build()
+     * History record with builder() to match service usage.
      */
     public static class History {
         private Instant at;
@@ -132,38 +136,41 @@ public class Issue {
 
         public Instant getAt() { return at; }
         public void setAt(Instant at) { this.at = at; }
-
         public String getBy() { return by; }
         public void setBy(String by) { this.by = by; }
-
         public String getAction() { return action; }
         public void setAction(String action) { this.action = action; }
-
         public String getNote() { return note; }
         public void setNote(String note) { this.note = note; }
-
         public String getToStatus() { return toStatus; }
         public void setToStatus(String toStatus) { this.toStatus = toStatus; }
     }
 
-    /* ========== image shim (if other code uses Image model) ========== */
-    // Keep a minimal Image class (if you already have one, ensure package matches)
-    // If you already created com.civrt.app.model.Image, ignore this.
+    /* Simple Image model (keeps compatibility with older code) */
     public static class Image {
-        private Long id;
+        private String id;
         private String url;
         private String publicId;
+
         public Image() {}
-        public Image(String url, String publicId) { this.url = url; this.publicId = publicId; }
-        public Long getId() { return id; } public void setId(Long id) { this.id = id; }
-        public String getUrl() { return url; } public void setUrl(String url) { this.url = url; }
-        public String getPublicId() { return publicId; } public void setPublicId(String publicId) { this.publicId = publicId; }
+
+        public Image(String url, String publicId) {
+            this.url = url;
+            this.publicId = publicId;
+        }
+
+        public String getId() { return id; }
+        public void setId(String id) { this.id = id; }
+        public String getUrl() { return url; }
+        public void setUrl(String url) { this.url = url; }
+        public String getPublicId() { return publicId; }
+        public void setPublicId(String publicId) { this.publicId = publicId; }
     }
 
-    /* ========== getters & setters ========== */
+    /* ===================== Getters & Setters ===================== */
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -174,18 +181,17 @@ public class Issue {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public Location getLocation() { return location; }
-    public void setLocation(Location location) { this.location = location; }
-
-    // convenience for earlier code which used lat/lng on Issue directly
     public Double getLat() { return lat != null ? lat : (location != null ? location.getLat() : null); }
     public void setLat(Double lat) { this.lat = lat; }
 
     public Double getLng() { return lng != null ? lng : (location != null ? location.getLng() : null); }
     public void setLng(Double lng) { this.lng = lng; }
 
-    public List<Media> getMedia() { return media; }
-    public void setMedia(List<Media> media) { this.media = media; }
+    public Location getLocation() { return location; }
+    public void setLocation(Location location) { this.location = location; }
+
+    public Media getMedia() { return media; }
+    public void setMedia(Media media) { this.media = media; }
 
     public List<Image> getImages() { return images; }
     public void setImages(List<Image> images) { this.images = images; }
@@ -193,17 +199,20 @@ public class Issue {
     public List<History> getHistory() { return history; }
     public void setHistory(List<History> history) { this.history = history; }
 
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public String getPriority() { return priority; }
+    public void setPriority(String priority) { this.priority = priority; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
 
     public String getAssignedTo() { return assignedTo; }
     public void setAssignedTo(String assignedTo) { this.assignedTo = assignedTo; }
